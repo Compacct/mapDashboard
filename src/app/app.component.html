@@ -1,6 +1,14 @@
 <div style="text-align: right; background-color: #85cf9454; ">
   <nz-select
       style="width: 12%;text-align: left;margin: 6px;"
+      [(ngModel)]="selectedMap"
+      nzAllowClear
+      nzPlaceHolder="Select Map"
+      [nzOptions]="listOfOptionMap"
+      (ngModelChange)="CommonPostApi()"
+    ></nz-select>
+  <nz-select
+      style="width: 12%;text-align: left;margin: 6px;"
       [(ngModel)]="selectReport"
       nzAllowClear
       nzPlaceHolder="Choose Report"
@@ -16,25 +24,26 @@
     ></nz-select>
    
 </div>
-<google-map height="100%"
+<google-map height="93%"
             width="100%"
             [center]="center"
             [zoom]="zoom"
             [options]="options">
+            
   <map-marker #marker="mapMarker"
               *ngFor="let markerPosition of markerPositions"
               [position]="markerPosition"
               [options]="markerPosition.markerOptions"
               (mapMouseover)="openInfoWindow(marker,markerPosition)"
               (mapMouseout)="closeInfoWindow()"
-               (mapClick)="openPopup(marker,markerPosition)"></map-marker>
- 
-  <map-info-window>
-   <p> {{optionObj.SalesMan}} </p>
-   <p> {{optionObj.Distributor}} </p>
-   <p> {{optionObj.Retailer}} </p>
- 
-</map-info-window>
+              (centerChanged)="onMapCenterChanged($event)"
+              (mapClick)="openPopup(marker,markerPosition)"></map-marker>
+               <!-- <map-circle  *ngFor="let value of salesmanCircles" [center]="value.center" [radius]="radius" /> -->
+  <!-- <map-info-window>
+   <p> {{optionObj.distributor}} </p>
+   <p> {{optionObj.route_name}} </p>
+ </map-info-window> -->
+
 
 </google-map>
 <nz-modal [(nzVisible)]="isVisible" [nzTitle]="optionObj.SalesMan" 
@@ -88,4 +97,8 @@
     </div>
   </ng-container>
 </nz-modal>
+
+<a *ngIf="backButton" (click)="clickBack()" class="float">
+  <i class="fa fa-arrow-left my-float"></i>
+  </a>
 <router-outlet></router-outlet>

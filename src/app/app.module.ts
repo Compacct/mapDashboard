@@ -46,7 +46,8 @@ registerLocaleData(en);
     NzPageHeaderModule,
     NzDropDownModule,
     NzIconModule,
-    NzSelectModule
+    NzSelectModule,
+    HttpClientModule
   ],
   providers: [
     { provide: NZ_I18N, useValue: en_US }

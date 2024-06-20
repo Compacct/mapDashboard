@@ -1,5 +1,7 @@
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { MapInfoWindow, MapMarker } from '@angular/google-maps';
+import {GoogleMap , MapInfoWindow, MapMarker } from '@angular/google-maps';
+
 declare const window: any;
 declare var google: any;
 @Component({
@@ -9,150 +11,19 @@ declare var google: any;
 })
 export class AppComponent implements OnInit {
   window!:any;
+  backButton:boolean = false
+  
   @ViewChild(MapInfoWindow) infoWindow: MapInfoWindow | undefined;
+  @ViewChild(GoogleMap, { static: false }) map!: GoogleMap;
   title = 'mapDashboard';
-  allData:any = 
-    [
-      {
-        "Lat": "22.670713",
-        "Long": "88.475155",
-        "Distributor": "D1",
-        "SalesMan": "S1",
-        "Retailer": "R_1_1",
-        "Color": "Red",
-        "Distributor_color": 1
-      },
-      {
-        "Lat": "22.665011",
-        "Long": "88.473095",
-        "Distributor": "D1",
-        "SalesMan": "S1",
-        "Retailer": "R_1_2",
-        "Color": "Green",
-        "Distributor_color": 1
-      },
-      {
-        "Lat": "22.664061",
-        "Long": "88.477730",
-        "Distributor": "D1",
-        "SalesMan": "S1",
-        "Retailer": "R_1_3",
-        "Color": "Orange",
-        "Distributor_color": 1
-      },
-      {
-        "Lat": "22.666595",
-        "Long": "88.483223",
-        "Distributor": "D1",
-        "SalesMan": "S1",
-        "Retailer": "R_1_4",
-        "Color": "Red",
-        "Distributor_color": 1
-      },
-      {
-        "Lat": "22.676891",
-        "Long": "88.478245",
-        "Distributor": "D1",
-        "SalesMan": "S1",
-        "Retailer": "R_1_5",
-        "Color": "Green",
-        "Distributor_color": 1
-      },
-      {
-        "Lat": "22.655665",
-        "Long": "88.494037",
-        "Distributor": "D1",
-        "SalesMan": "S2",
-        "Retailer": "R_2_1",
-        "Color": "Green",
-        "Distributor_color": 1
-      },
-      {
-        "Lat": "22.651704",
-        "Long": "88.482021",
-        "Distributor": "D1",
-        "SalesMan": "S2",
-        "Retailer": "R_2_2",
-        "Color": "Green",
-        "Distributor_color": 1
-      },
-      {
-        "Lat": "22.657407",
-        "Long": "88.494209",
-        "Distributor": "D1",
-        "SalesMan": "S2",
-        "Retailer": "R_2_3",
-        "Color": "Red",
-        "Distributor_color": 1
-      },
-      {
-        "Lat": "22.642991",
-        "Long": "88.482193",
-        "Distributor": "D1",
-        "SalesMan": "S2",
-        "Retailer": "R_2_4",
-        "Color": "Green",
-        "Distributor_color": 1
-      },
-      {
-        "Lat": "22.647585",
-        "Long": "88.493523",
-        "Distributor": "D1",
-        "SalesMan": "S2",
-        "Retailer": "R_2_5",
-        "Color": "Orange",
-        "Distributor_color": 1
-      },
-      {
-        "Lat": "22.659308",
-        "Long": "88.527340",
-        "Distributor": "D2",
-        "SalesMan": "S3",
-        "Retailer": "R_3_1",
-        "Color": "Orange",
-        "Distributor_color": 2
-      },
-      {
-        "Lat": "22.659150",
-        "Long": "88.540386",
-        "Distributor": "D2",
-        "SalesMan": "S3",
-        "Retailer": "R_3_2",
-        "Color": "Green",
-        "Distributor_color": 2
-      },
-      {
-        "Lat": "22.655506",
-        "Long": "88.536953",
-        "Distributor": "D2",
-        "SalesMan": "S3",
-        "Retailer": "R_3_3",
-        "Color": "Green",
-        "Distributor_color": 2
-      },
-      {
-        "Lat": "22.664061",
-        "Long": "88.544334",
-        "Distributor": "D2",
-        "SalesMan": "S3",
-        "Retailer": "R_3_4",
-        "Color": "Red",
-        "Distributor_color": 2
-      },
-      {
-        "Lat": "22.639664",
-        "Long": "88.532146",
-        "Distributor": "D2",
-        "SalesMan": "S3",
-        "Retailer": "R_3_5",
-        "Color": "Green",
-        "Distributor_color": 2
-      }
-    ]
+  public geocoder: google.maps.Geocoder;
+
+  allData:any =[]
     allDataBckUp:any = []
     isVisible:boolean = false
     selectedValue = undefined;
     selectReport:any = undefined
+    selectedMap:any = undefined
     multipleValue:any = []
     listOfOptionMulti:any = [
       { label: 'R1', value: 'R1' },
@@ -162,77 +33,111 @@ export class AppComponent implements OnInit {
     listOfOption = [
       { label: 'Green', value: 'Green' },
       { label: 'Red', value: 'Red' },
-      { label: 'Orange', value: 'Orange', },
+      { label: 'Blue', value: 'Blue', },
     ];
-  constructor(){
+    listOfOptionMap:any = []
+    center: google.maps.LatLngLiteral = {
+    lat: 22.5630255,
+    lng: 88.39625699999999
+      };
+options: google.maps.MapOptions = {
+  zoomControl: false,
+  scrollwheel: true,
+  disableDoubleClickZoom: false,
+  styles: [
+    {
+      featureType: "administrative",
+      elementType: "labels",
+      stylers: [{ visibility: "off" }]
+    },
+    {
+      featureType: "poi",
+      elementType: "labels",
+      stylers: [{ visibility: "off" }]
+    },
+    {
+      featureType: "road",
+      elementType: "labels",
+      stylers: [{ visibility: "off" }]
+    },
+    {
+      featureType: "transit",
+      elementType: "labels",
+      stylers: [{ visibility: "off" }]
+    }
+  ],
+  maxZoom: 18,
+  minZoom: 3,
+};
+zoom = 9;
+markerOptions: google.maps.MarkerOptions = {};
+optionObj:any = {}
+markerPositions: any = [];
+  constructor(
+    private $http : HttpClient
+  ){
+    this.geocoder = new google.maps.Geocoder();
     this.window = window;
-    console.log(this.markerOptions)
   }
   ngOnInit(): void {
-    // const strokColor = (Distributorcolor:any) =>{
-    //   if(Distributorcolor == 1){
-    //     return '#0222E9'
-    //   }
-    //   if(Distributorcolor == 2){
-    //     return '#47054D'
-    //   }
-     
-    //   return
-    // }
-    // this.allData.forEach((ele:any) => {
-    //   this.markerPositions.push(
-    //     {
-    //     "Distributor": ele.Distributor,
-    //     "SalesMan": ele.SalesMan,
-    //     "Retailer": ele.Retailer,
-    //     'lat':Number(ele.Lat),
-    //     "lng":Number(ele.Long),
-    //     "markerOptions": this.markerOptions = {
-    //         icon: {
-    //         path: google.maps.SymbolPath.CIRCLE,
-    //         scale: 10,
-    //         strokeColor: strokColor(ele.Distributor_color),
-    //         fillColor: ele.Color,
-    //         fillOpacity: 1,
-    //         strokeWeight:8
-    //       }
-    //     } })
-    // });
-    this.allDataBckUp = [...this.allData]
-    this.getmapData(this.allData)
-  
+   
+  //this.CommonPostApi()
+  this.getMapList()
   }
-  optionObj:any = {}
-  getmapData(datalist:[]){
+
+  getMapList(){
+    this.listOfOptionMap = []
+   const httpOptions = {
+      headers: new HttpHeaders({
+       'x-functions-key': 'MlAFr2EHtO0l9-RyvYwOdpNXKYiczxmvjyYF3eIs3b6SAzFuRYL_ig==',
+       'spc': 'YMHE7AC0TGBWMJCWT5Q0'
+      }),
+    };
+    this.$http.get('https://compaccterptestenv.azurewebsites.net/api/compacctget/nested',httpOptions).subscribe((data:any)=>{
+      console.log(data)
+      this.listOfOptionMap = data.data.length ? data.data : []
+      if(this.listOfOptionMap.length){
+        this.listOfOptionMap.forEach((el:any) => {
+          el['label'] = el.map_name
+          el['value'] = el.sp_code
+        });
+      }
+      
+    })
+
+  }
+  mapChange(){
+
+  }
+  async getmapData(datalist){
     this.allData = []
     this.markerPositions = []
-    const strokColor = (Distributorcolor:any) =>{
-      if(Distributorcolor == 1){
-        return '#0222E9'
+    const selectImg = (colorName:any)=>{
+      switch (colorName) {
+        case 'Red': return 'assets/img/red-vactor.png'; 
+        case 'Green': return 'assets/img/green.png';
+        case 'Blue': return 'assets/img/vector-blue.png' 
+       default: return 'assets/img/Distribution.png';
       }
-      if(Distributorcolor == 2){
-        return '#47054D'
-      }
-     
-      return
     }
-    datalist.forEach((ele:any) => {
-      this.markerPositions.push(
+
+   datalist.forEach(async (ele:any , inx) => {
+      const latLng = await this.getLatLongFromPincode(String(ele.distributor_pin))
+       this.markerPositions.push(
         {
-        "Distributor": ele.Distributor,
-        "SalesMan": ele.SalesMan,
-        "Retailer": ele.Retailer,
-        'lat':Number(ele.Lat),
-        "lng":Number(ele.Long),
+        "distributor": ele.distributor,
+        "route_name": ele.route_name,
+        'distributor_hash':ele.distributor_hash,
+        'route_hash':ele.route_hash,
+        'lat':Number(latLng.lat()),
+        "lng":Number(latLng.lng()),
+        'Distributorcolor':inx + 1,
         "markerOptions": this.markerOptions = {
-            icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 10,
-            strokeColor: strokColor(ele.Distributor_color),
-            fillColor: ele.Color,
-            fillOpacity: 1,
-            strokeWeight:8
-          }
+         icon: {
+            url: selectImg(ele.final_color), // Specify the path to your custom icon
+            scaledSize: new google.maps.Size(20, 25) // Adjust the size here
+          },
+         title: ele.distributor
         } })
     });
     this.allData = [...datalist]
@@ -257,15 +162,37 @@ export class AppComponent implements OnInit {
     this.isVisible = false;
   }
   openPopup(marker: MapMarker,option:any){
-    if (this.infoWindow != undefined) this.isVisible = true
+   // 
     this.optionObj = option
+    if(option.distributor_hash){
+      this.map.googleMap.setOptions(null)
+      setTimeout(() => {
+        this.map.googleMap.setOptions({
+          zoomControl: false,
+          scrollwheel: true,
+          disableDoubleClickZoom: false,
+          maxZoom: 18,
+          minZoom: 3,
+        })
+          this.map.googleMap.setCenter({ lat:  22.5630255, lng: 88.39625699999999 })
+          this.map.googleMap.setZoom(10)
+       
+      }, 0);
+      
+      this.CommonPostclickApi(option)
+      this.backButton = true
+    }
+    if(option.outlet_id){
+      this.isVisible = true
+    }
+    
   }
   change(value: boolean): void {
     console.log(value);
   }
   colorChange(){
     if(this.selectedValue){
-      const fillColor= this.allDataBckUp.filter((el:any)=> el.Color == this.selectedValue)
+      const fillColor= this.allDataBckUp.filter((el:any)=> el.final_color == this.selectedValue)
       this.getmapData(fillColor)
     }
     else {
@@ -288,25 +215,99 @@ export class AppComponent implements OnInit {
     console.log("tempdata",tempdata)
     this.getmapData(tempdata)
   }
-  center: google.maps.LatLngLiteral = {
-    lat: 22.670713,
-    lng: 88.532146
-};
-options: google.maps.MapOptions = {
-   zoomControl: false,
-  scrollwheel: true,
-  disableDoubleClickZoom: false,
-  maxZoom: 15,
-  minZoom: 3,
-};
-zoom = 10;
+  CommonPostApi(){
+    this.allData = []
+    this.allDataBckUp = []
+    if(this.selectedMap){
+      const httpOptions = {
+        headers: new HttpHeaders({
+         'x-functions-key': 'MlAFr2EHtO0l9-RyvYwOdpNXKYiczxmvjyYF3eIs3b6SAzFuRYL_ig==',
+         'spc': this.selectedMap
+        }),
+      };
+      const url = `https://compaccterptestenv.azurewebsites.net/api/compacctget/nested`
+      this.$http.get(url,httpOptions).subscribe((data:any)=>{
+      console.log(data.data)
+      this.allData = data.data
+      this.allDataBckUp = [...this.allData]
+      
+      this.getmapData(this.allData)
+    })
+    }
+   
+  }
 
-markerOptions: google.maps.MarkerOptions = {};
-vertices: google.maps.LatLngLiteral[] = [];
-verticesOption:google.maps.PolylineOptions = {
- strokeColor: 'red',
-  strokeWeight:100
-}
-markerPositions: any = [];
+  getLatLongFromPincode(pincode: string): Promise<google.maps.LatLng> {
+    return new Promise((resolve, reject) => {
+      this.geocoder.geocode({ address: pincode }, (results, status) => {
+        if (status === 'OK' && results.length > 0) {
+          const location = results[0].geometry.location;
+          const latLng = new google.maps.LatLng(location.lat(), location.lng());
+          resolve(latLng);
+        } else {
+          reject('Geocode was not successful for the following reason: ' + status);
+        }
+      });
+    });
+  }
+
+  CommonPostclickApi(option){
+    this.allData = []
+    this.allDataBckUp = []
+    this.markerPositions = []
+    const url = `https://compaccterptestenv.azurewebsites.net/api/compacctpost/nested`
+    const httpOptions = { headers: new HttpHeaders({ 'Content-Type': 'application/json' , 'spc':'BPFIIRYWOC4HFAHIOQR5','x-functions-key':"MlAFr2EHtO0l9-RyvYwOdpNXKYiczxmvjyYF3eIs3b6SAzFuRYL_ig=="}) };
+    this.$http.post(url,JSON.stringify({distributor_hash:option.distributor_hash, route_hash : option.route_hash}),httpOptions).subscribe((data:any)=>{
+      console.log(data.data)
+      this.allData = data.data
+    this.allDataBckUp = [...this.allData]
+    this.allData.forEach(async (ele:any) => {
+      this.markerPositions.push(
+        {
+        "route_name": ele.route_name,
+        'lat':Number(ele.Lat),
+        "lng":Number(ele.Long),
+        'outlet_id':ele.outlet_id,
+        "markerOptions": this.markerOptions = {
+            icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            strokeColor: '#57C9EA',
+            fillColor: ele.Color,
+            fillOpacity: 1,
+            strokeWeight:5
+          },
+          title: ele.retailer
+        } 
+        
+        })
+    });
+  })
+  }
+
+  onMapCenterChanged(e){
+    console.log(e)
+  }
+  clickBack(){
+    this.map.googleMap.setOptions({
+      zoomControl: false,
+      scrollwheel: true,
+      disableDoubleClickZoom: false,
+      maxZoom: 18,
+      minZoom: 3,
+    })
+    setTimeout(() => {
+      // this.map.googleMap = new google.maps.Map(this.map.c, {
+      //   center: { lat: 40.730610, lng: -73.935242 }, // Example coordinates
+      //   zoom: 12 // Example zoom level
+      // });
+      this.map.googleMap.setCenter({ lat:  22.5630255, lng: 88.39625699999999 })
+      this.map.googleMap.setZoom(10)
+    }, 0);
+    this.backButton = false
+    this.CommonPostApi()
+  
+  }
+
 
 }

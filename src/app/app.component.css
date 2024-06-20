@@ -1,3 +1,16 @@
-.ant-select{
-    color: rgb(23 134 229 / 85%) !important;
+.float{
+	position:fixed;
+	width: 43px;
+    height: 52px;
+    bottom: 39px;
+    right: 39px;
+	background-color:#900C3F;
+	color:#FFF;
+	border-radius:50px;
+	text-align:center;
+	box-shadow: 2px 2px 3px #999;
+}
+
+.my-float{
+	margin-top:18px;
 }
