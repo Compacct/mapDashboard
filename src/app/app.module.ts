@@ -22,10 +22,21 @@ import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzSelectModule } from 'ng-zorro-antd/select';
+import { MapCanvasComponent } from './map-canvas/map-canvas.component';
+import { CompacctDaterangepickerComponent } from './daterangepicker/daterangepicker.component';
+import { DateRangePickerModule } from '@syncfusion/ej2-angular-calendars';
+import { registerLicense } from '@syncfusion/ej2-base';
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzDrawerModule } from 'ng-zorro-antd/drawer';
 registerLocaleData(en);
+// Registering Syncfusion license key
+registerLicense('Ngo9BigBOggjHTQxAR8/V1NHaF5cXmtCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdgWXZceHRdR2BeU0F+W0I='); 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    MapCanvasComponent,
+    CompacctDaterangepickerComponent
   ],
   imports: [
     BrowserModule,
@@ -47,7 +58,11 @@ registerLocaleData(en);
     NzDropDownModule,
     NzIconModule,
     NzSelectModule,
-    HttpClientModule
+    HttpClientModule,
+    DateRangePickerModule,
+    NzTableModule,
+    NzButtonModule,
+    NzDrawerModule
   ],
   providers: [
     { provide: NZ_I18N, useValue: en_US }

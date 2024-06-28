@@ -14,3 +14,29 @@
 .my-float{
 	margin-top:18px;
 }
+.btn {
+	top: 28px;
+  left: 33px;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+  }
+  .btn:hover {
+	transform: scale(1.1);
+  }
+  .btn i {
+	transition: transform 0.3s ease;
+  }
+  .btn:hover i {
+	transform: rotate(90deg);
+  }
+
+  label {
+    display: inline-block;
+    max-width: 100%;
+    margin-bottom: 5px;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+
+

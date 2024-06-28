@@ -1,4 +1,4 @@
-<div style="text-align: right; background-color: #85cf9454; ">
+<!-- <div style="text-align: right; background-color: #85cf9454; ">
   <nz-select
       style="width: 12%;text-align: left;margin: 6px;"
       [(ngModel)]="selectedMap"
@@ -23,22 +23,19 @@
       (ngModelChange)="colorChange()"
     ></nz-select>
    
-</div>
-<google-map height="93%"
-            width="100%"
-            [center]="center"
-            [zoom]="zoom"
-            [options]="options">
-            
-  <map-marker #marker="mapMarker"
-              *ngFor="let markerPosition of markerPositions"
-              [position]="markerPosition"
-              [options]="markerPosition.markerOptions"
-              (mapMouseover)="openInfoWindow(marker,markerPosition)"
-              (mapMouseout)="closeInfoWindow()"
-              (centerChanged)="onMapCenterChanged($event)"
-              (mapClick)="openPopup(marker,markerPosition)"></map-marker>
-               <!-- <map-circle  *ngFor="let value of salesmanCircles" [center]="value.center" [radius]="radius" /> -->
+</div> -->
+
+
+<button class="btn btn-primary position-absolute" (click)="open()" *ngIf="!visible">
+  <i class="fa-solid fa-bars"></i>
+</button>
+<google-map height="100%" width="100%" [center]="center" [zoom]="zoom" [options]="options">
+
+  <map-marker #marker="mapMarker" *ngFor="let markerPosition of markerPositions" [position]="markerPosition"
+    [options]="markerPosition.markerOptions" (mapMouseover)="openInfoWindow(marker,markerPosition)"
+    (mapMouseout)="closeInfoWindow()" (centerChanged)="onMapCenterChanged($event)"
+    (mapClick)="openPopup(marker,markerPosition)"></map-marker>
+  <!-- <map-circle  *ngFor="let value of salesmanCircles" [center]="value.center" [radius]="radius" /> -->
   <!-- <map-info-window>
    <p> {{optionObj.distributor}} </p>
    <p> {{optionObj.route_name}} </p>
@@ -46,59 +43,83 @@
 
 
 </google-map>
-<nz-modal [(nzVisible)]="isVisible" [nzTitle]="optionObj.SalesMan" 
-(nzOnCancel)="handleCancel()" 
-(nzOnOk)="handleOk()"
-[nzWidth]="850">
+<nz-modal [(nzVisible)]="isVisible" [nzTitle]="optionObj.SalesMan" [nzClosable]="false" [nzKeyboard]="true"
+  (nzOnCancel)="handleCancel()" [nzWidth]="850">
   <ng-container *nzModalContent>
-    <div nz-row>
-      <div nz-col [nzSpan]="18" [nzPush]="6">
-         
-      </div>
-      <div nz-col [nzSpan]="6" [nzPull]="18">   
-        <ul nz-menu [nzMode]="'vertical'">
-        <li nz-submenu nzTitle="Order Information" nzIcon="mail">
-          <!-- <ul>
-            <li nz-menu-group nzTitle="Item 1">
-              <ul>
-                <li nz-menu-item>Option 1</li>
-                <li nz-menu-item>Option 2</li>
-              </ul>
-            </li>
-            <li nz-menu-group nzTitle="Item 2">
-              <ul>
-                <li nz-menu-item>Option 3</li>
-                <li nz-menu-item>Option 4</li>
-              </ul>
-            </li>
-          </ul> -->
-        </li>
-        <li nz-submenu (nzOpenChange)="change($event)" nzTitle="Payment Information" nzIcon="appstore">
-          <!-- <ul>
-            <li nz-menu-item>Option 5</li>
-            <li nz-menu-item>Option 6</li>
-            <li nz-submenu nzTitle="Submenu">
-              <ul>
-                <li nz-menu-item>Option 7</li>
-                <li nz-menu-item>Option 8</li>
-              </ul>
-            </li>
-          </ul> -->
-        </li>
-        <li nz-submenu nzTitle="Delivery Information" nzIcon="setting">
-          <ul>
-            <li nz-menu-item>Option 9</li>
-            <li nz-menu-item>Option 10</li>
-            <li nz-menu-item>Option 11</li>
-          </ul>
-        </li>
-      </ul>
-    </div>
-    </div>
+    <nz-table #rowSelectionTable [nzData]="popupListData" nzBordered [nzPageSize]="50">
+      <thead>
+        <tr>
+          <th nowrap *ngFor="let column of popupListDataHeader">{{column.replaceAll('_',' ').toUpperCase()}}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of rowSelectionTable.data">
+          <td nzWidth="100px" *ngFor="let column of popupListDataHeader">{{ data[column] }}</td>
+        </tr>
+      </tbody>
+    </nz-table>
   </ng-container>
+  <div *nzModalFooter>
+    <button nz-button nzType="primary" (click)="handleCancel()">Cancel</button>
+  </div>
 </nz-modal>
 
 <a *ngIf="backButton" (click)="clickBack()" class="float">
   <i class="fa fa-arrow-left my-float"></i>
-  </a>
+</a>
+
+
+<nz-drawer [nzBodyStyle]="{ overflow: 'auto' }" [nzMaskClosable]="true" [nzVisible]="visible"
+  nzTitle="Compacct Map Dashboard" [nzPlacement]="'left'" (nzOnClose)="close()">
+  <div class="container" *nzDrawerContent>
+    <div class="row" >
+        <div class="col-sm-12" >
+          <label >Map</label>
+          <nz-select style="width: 100%;" [(ngModel)]="selectedMap" nzAllowClear
+          nzPlaceHolder="Select Map" [nzOptions]="listOfOptionMap"></nz-select>
+        </div>
+        <div class="com-sm-12" >
+          <label >Date Range</label>
+          <app-daterangepicker (DaterangeObj)="getDateRange($event)"></app-daterangepicker>
+        </div>
+        <div class="col-sm-12" style="text-align: right;" >
+          <button type="button" nz-button nzType="primary" (click)="CommonPostApi()"
+          style="margin-top: 6px;  height: 32px; padding-top: 3px;">Show</button>
+        </div>
+    </div>
+
+    <div class="row" *ngIf="allData.length" >
+      <div class="col-sm-12">
+        <label >Filter Color</label>
+        <nz-select style="text-align: left;width: 100%;" [(ngModel)]="selectedColor" nzAllowClear
+          nzPlaceHolder="Color" [nzOptions]="finalColors" (ngModelChange)="applyFilters()"></nz-select>
+      </div>
+      <div class="col-sm-12">
+        <label >Filter State</label>
+        <nz-select style="text-align: left;width: 100%;" [(ngModel)]="selectedState" nzAllowClear
+          nzPlaceHolder="Filter State" [nzOptions]="states" (ngModelChange)="onStateChange()"></nz-select>
+      </div>
+      <div class="col-sm-12">
+        <label >Filter District</label>
+        <nz-select style="text-align: left;width: 100%;" [(ngModel)]="selectedDistrict" nzAllowClear
+          nzPlaceHolder="Filter District" [nzOptions]="districts" (ngModelChange)="applyFilters()"></nz-select>
+      </div>
+      <div class="col-sm-12">
+        <label >Filter Zone</label>
+        <nz-select style="text-align: left;width: 100%;" [(ngModel)]="selectedZone" nzAllowClear
+          nzPlaceHolder="Filter Zone" [nzOptions]="zones" (ngModelChange)="applyFilters()"></nz-select>
+      </div>
+    </div>
+    
+  </div>
+  <!-- <ng-template #footerTpl>
+    <div style="float: right">
+      <button nz-button style="margin-right: 8px;" (click)="close()">Cancel</button>
+      <button nz-button nzType="primary" (click)="close()">Submit</button>
+    </div>
+  </ng-template> -->
+</nz-drawer>
+
+
+
 <router-outlet></router-outlet>
