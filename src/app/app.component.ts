@@ -89,6 +89,7 @@ export class AppComponent implements OnInit {
     markerOptions: google.maps.MarkerOptions = {};
     optionObj:any = {}
     markerPositions: any = [];
+    comp_hash_map:any;
   constructor(
     private $http : HttpClient,
     private DateConvert:DateConvertService
@@ -100,6 +101,9 @@ export class AppComponent implements OnInit {
    
   //this.CommonPostApi()
   this.getMapList()
+  const params = new URLSearchParams(window.location.search);
+  this.comp_hash_map = params.get("hash");
+  console.log('comp_hash_map_2',this.comp_hash_map)
   }
 
   getMapList(){
@@ -263,6 +267,7 @@ export class AppComponent implements OnInit {
          'spc': this.selectedMap
         }),
       };
+        this.objmapData.comp_hash=this.comp_hash_map;
         this.objmapData.fdate = this.objmapData.fdate ? this.DateConvert.date_Convert(this.objmapData.fdate) : this.DateConvert.date_Convert(new Date())
         this.objmapData.tdate = this.objmapData.tdate ? this.DateConvert.date_Convert(this.objmapData.tdate) : this.DateConvert.date_Convert(new Date())
       const url = `https://compaccterptestenv.azurewebsites.net/api/compacctpost/nested`
@@ -417,4 +422,5 @@ export class AppComponent implements OnInit {
 class mapData{
   fdate:any
   tdate:any
+  comp_hash:any
 }
